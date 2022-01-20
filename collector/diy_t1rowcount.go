@@ -10,7 +10,7 @@ import (
 var t1rowcountDesc = prometheus.NewDesc(
 	prometheus.BuildFQName(namespace, "diy", "t1_row_count"),
 	"is t1 row count",
-	nil, nil,
+	[]string{"NewDesc", "VariablesLabel"}, nil,
 )
 
 type DiyScrape struct {
@@ -41,7 +41,7 @@ func (DiyScrape) Scrape(ctx context.Context, db *sql.DB, ch chan<- prometheus.Me
 
 	for rows.Next() {
 		rows.Scan(&ret)
-		ch <- prometheus.MustNewConstMetric(t1rowcountDesc, prometheus.GaugeValue, float64(ret))
+		ch <- prometheus.MustNewConstMetric(t1rowcountDesc, prometheus.GaugeValue, float64(ret), "labelValue_IN_mustNewConstMetric_1", "labelValue_IN_mustNewConstMetric_2")
 	}
 
 	return nil
