@@ -104,6 +104,7 @@ var scrapers = map[collector.Scraper]bool{
 	collector.ScrapeSlaveHosts{}:                          false,
 	collector.ScrapeReplicaHost{}:                         false,
 	collector.DiyScrapeLongTrx{}:                          true,
+	collector.DiyScrapeBlockedTrx{}:                       true,
 }
 
 func parseMycnf(config interface{}) (string, error) {

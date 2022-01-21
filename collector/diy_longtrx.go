@@ -110,7 +110,10 @@ func (DiyScrapeLongTrx) Scrape(ctx context.Context, db *sql.DB, ch chan<- promet
 			killThread        string // 杀线程语句
 			killQuery         string // 杀查询语句
 		}
+
 		longTrxInfoRows, err := db.QueryContext(ctx, longTrxInfoQuery)
+		defer longTrxInfoRows.Close()
+
 		if err != nil {
 			logger.Log(err.Error()) // 输出到阿里云?,若输出到阿里云则需要区分日志内容;此处报错 只记录，而不是 return err 退出 采集器
 		}
