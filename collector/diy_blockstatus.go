@@ -188,7 +188,7 @@ func (DiyScrapeBlockedTrx) Scrape(ctx context.Context, db *sql.DB, ch chan<- pro
 				&blockedTrxInfo.killBlockingQuery,
 				&blockedTrxInfo.killBlockingThread)
 			blockInfoMsg := fmt.Sprintf(`
-                发现阻塞
+                出现_阻塞
 -----------------------------------------
                   报告 
 阻塞时长(秒)	: 				%d

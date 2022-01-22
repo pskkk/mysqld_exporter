@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/mysqld_exporter/tools"
 )
 
 const (
@@ -136,6 +137,48 @@ func (DiyScrapeLongTrx) Scrape(ctx context.Context, db *sql.DB, ch chan<- promet
 				&longTrxInfo.sqlText,
 				&longTrxInfo.killThread,
 				&longTrxInfo.killQuery)
+			longTrxInfoMsg := fmt.Sprintf(`
+				出现_长事务
+-----------------------------------------
+线程ID				:		%s
+事务ID             	:		%s
+状态             	:       %s
+启动时间           	:       %s
+所需锁ID          	:       %s
+操作状态           	:       %s
+打开表				:       %d
+持有行锁的表数量		:       %d
+持有行锁数量         	:       %d
+隔离级别           	:       %s
+是否为只读事务      	:       %d
+event名称        	:       %s
+当前时间           	:       %s
+运行时间(秒)			:       %d
+当前执行SQL        	:       %s
+上一个执行完的SQL		:       %s
+------------------------------------------
+			     处理语句
+Kill_Thread         :       %s
+Kill_Query          :       %s
+`, longTrxInfo.trxThreadID,
+				longTrxInfo.trxID,
+				longTrxInfo.trxState,
+				longTrxInfo.trxStartTime,
+				longTrxInfo.trxRequestLockID,
+				longTrxInfo.trxOperationState,
+				longTrxInfo.trxTableInUse,
+				longTrxInfo.trxTablesLocked,
+				longTrxInfo.trxRowsLocked,
+				longTrxInfo.trxIsolationLevel,
+				longTrxInfo.trxIsReadOnly,
+				longTrxInfo.eventName,
+				longTrxInfo.nowTime,
+				longTrxInfo.timecost,
+				longTrxInfo.sqlQuery,
+				longTrxInfo.sqlText,
+				longTrxInfo.killThread,
+				longTrxInfo.killQuery)
+			tools.SendReport2Users(longTrxInfoMsg)
 			fmt.Println(longTrxInfo) // 输出阿里云日志
 
 		}
