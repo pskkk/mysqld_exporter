@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/mysqld_exporter/tools"
 )
 
 const (
@@ -186,9 +187,67 @@ func (DiyScrapeBlockedTrx) Scrape(ctx context.Context, db *sql.DB, ch chan<- pro
 				&blockedTrxInfo.waitingSQL,
 				&blockedTrxInfo.killBlockingQuery,
 				&blockedTrxInfo.killBlockingThread)
+			blockInfoMsg := fmt.Sprintf(`
+                发现阻塞
+-----------------------------------------
+                  报告 
+阻塞时长(秒)	: 				%d
+加锁表		: 				%s
+加锁索引		: 				%s
+锁类型		: 				%s
+-----------------------------------------
+			   阻塞事务信息
+事务ID		:				%s	
+PID			:				%s
+锁ID		:				%s
+锁类型		:				%s
+事务开始时间	:				%s
+事务运行时长	:            	%s
+事务持锁行数	:               %d
+事务修改行数	:               %d
+当前SQL语句	:               %s
+-----------------------------------------
+			   等待事务信息
+事务ID		:            	%s
+PID			:               %s
+锁ID		:               %s
+锁类型		:               %s
+事务开始时间	:               %s
+事务运行时长	:               %s
+事务持锁行数	:               %d
+事务修改行数	:               %d
+当前SQL语句	:               %s
+-----------------------------------------
+			   处理语句
+kill_Query	: 				%s
+kill_Thread	:				%s
+`, blockedTrxInfo.summaryWaitSecs,
+				blockedTrxInfo.summaryLockedTable,
+				blockedTrxInfo.summaryLockedIndex,
+				blockedTrxInfo.summaryLockType,
+				blockedTrxInfo.blokingTrxID,
+				blockedTrxInfo.blockingPID,
+				blockedTrxInfo.blockingLockID,
+				blockedTrxInfo.blockingLockMode,
+				blockedTrxInfo.blockingTrxStartTime,
+				blockedTrxInfo.blockingTrxAge,
+				blockedTrxInfo.blockingTrxRowsLocked,
+				blockedTrxInfo.blockingTrxRowsModified,
+				blockedTrxInfo.blockingSQL,
+				blockedTrxInfo.waitingTrxID,
+				blockedTrxInfo.waitingPID,
+				blockedTrxInfo.waitingLockID,
+				blockedTrxInfo.waitingLockMode,
+				blockedTrxInfo.waitingTrxStartTime,
+				blockedTrxInfo.waitingTrxAge,
+				blockedTrxInfo.waitingTrxRowsLocked,
+				blockedTrxInfo.waitingTrxRowsModified,
+				blockedTrxInfo.waitingSQL,
+				blockedTrxInfo.killBlockingQuery,
+				blockedTrxInfo.killBlockingThread)
+			tools.SendReport2Users(blockInfoMsg)
 			fmt.Println(blockedTrxInfo)
 		}
-		fmt.Println("----------------------------------------------")
 	}
 	ch <- prometheus.MustNewConstMetric(blockedTrxDesc, prometheus.GaugeValue, float64(blockedTrxMaxSecs))
 
