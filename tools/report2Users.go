@@ -24,7 +24,9 @@ func SendReport2Users(finallyRet string) {
 
 	jsonByte, _ := json.Marshal(sendMap)
 
-	request, err := http.NewRequest("POST", "https://1582641101891538.cn-beijing.fc.aliyuncs.com/2016-08-15/proxy/service-ops-helper/function-dingtalk-sendmsg/", bytes.NewBuffer(jsonByte))
+	//request, err := http.NewRequest("POST", "https://1582641101891538.cn-beijing.fc.aliyuncs.com/2016-08-15/proxy/service-ops-helper/function-dingtalk-sendmsg/", bytes.NewBuffer(jsonByte))
+	request, err := http.NewRequest("POST", "https://oapi.dingtalk.com/robot/send?access_token=002789a338e2b45d686be2249d4df5e600fc78b87c33677add214afd9e205168", bytes.NewBuffer(jsonByte))
+
 	if err != nil {
 		fmt.Println(err.Error())
 	}
