@@ -189,6 +189,8 @@ func newHandler(metrics collector.Metrics, scrapers []collector.Scraper, logger 
 		params := r.URL.Query()["collect[]"]
 		// Use request context for cancellation when connection gets closed.
 		ctx := r.Context()
+		// 测试,新增 context.WithValue()
+		ctx = context.WithValue(ctx, "hostname", "test")
 		// If a timeout is configured via the Prometheus header, add it to the context.
 		if v := r.Header.Get("X-Prometheus-Scrape-Timeout-Seconds"); v != "" {
 			timeoutSeconds, err := strconv.ParseFloat(v, 64)

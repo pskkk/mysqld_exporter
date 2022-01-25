@@ -1,11 +1,10 @@
 package tools
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
+	"strings"
 )
 
 // SendReport2Users : 发送内容到指定用户的钉钉工作通知(机器人url更改)，SendReport2Users("msg_string")
@@ -16,25 +15,14 @@ func SendReport2Users(finallyRet string) {
 		return
 	}
 
-	sendMap := make(map[string]string)
+	msgtext := fmt.Sprintf(`{"msgtype": "text","text": {"%s"}}`, finallyRet)
 
-	//sendMap["uname"] = strings.Join(username, ",") // post 传递过来的 就包含人名，解析出来
-	sendMap["uname"] = "shimin.shan"
-	sendMap["msg"] = finallyRet
-
-	jsonByte, _ := json.Marshal(sendMap)
-
-	//request, err := http.NewRequest("POST", "https://1582641101891538.cn-beijing.fc.aliyuncs.com/2016-08-15/proxy/service-ops-helper/function-dingtalk-sendmsg/", bytes.NewBuffer(jsonByte))
-	request, err := http.NewRequest("POST", "https://oapi.dingtalk.com/robot/send?access_token=002789a338e2b45d686be2249d4df5e600fc78b87c33677add214afd9e205168", bytes.NewBuffer(jsonByte))
-
+	resp, err := http.Post("https://oapi.dingtalk.com/robot/send?access_token=002789a338e2b45d686be2249d4df5e600fc78b87c33677add214afd9e205168",
+		"application/json",
+		strings.NewReader(msgtext))
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println(err)
 	}
 
-	client := http.Client{}
-	_, err = client.Do(request)
-
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	defer resp.Body.Close()
 }

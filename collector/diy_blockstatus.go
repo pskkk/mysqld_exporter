@@ -119,7 +119,7 @@ func (DiyScrapeBlockedTrx) Version() float64 {
 
 func (DiyScrapeBlockedTrx) Scrape(ctx context.Context, db *sql.DB, ch chan<- prometheus.Metric, logger log.Logger) error {
 	var blockedTrxMaxSecs int
-
+	fmt.Println("BLocked --------------->>>>", ctx)
 	if err := db.QueryRowContext(ctx, blockedTrxCountQuery).Scan(&blockedTrxMaxSecs); err != nil {
 		logger.Log(err.Error())
 		return err
