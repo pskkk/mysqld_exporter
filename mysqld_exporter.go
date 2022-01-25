@@ -64,7 +64,8 @@ var (
 		"tls.insecure-skip-verify",
 		"Ignore certificate and server verification when using a tls connection.",
 	).Bool()
-	dsn string
+	dsn         string
+	diyNodeName string // 个人新增，保存配置文件中的 nodename 配置项
 )
 
 // scrapers lists all possible collection methods and if they should be enabled by default.
@@ -122,6 +123,7 @@ func parseMycnf(config interface{}) (string, error) {
 	if user == "" {
 		return dsn, fmt.Errorf("no user specified under [client] in %s", config)
 	}
+	diyNodeName = cfg.Section("client").Key("diynodename").MustString("notSet") // 获取配置文件中的 nodename
 	host := cfg.Section("client").Key("host").MustString("localhost")
 	port := cfg.Section("client").Key("port").MustUint(3306)
 	socket := cfg.Section("client").Key("socket").String()
@@ -189,8 +191,8 @@ func newHandler(metrics collector.Metrics, scrapers []collector.Scraper, logger 
 		params := r.URL.Query()["collect[]"]
 		// Use request context for cancellation when connection gets closed.
 		ctx := r.Context()
-		// 测试,新增 context.WithValue()
-		ctx = context.WithValue(ctx, "hostname", "test")
+		// 新增 context.WithValue(), 传递配置文件中的节点名称
+		ctx = context.WithValue(ctx, "hostname", diyNodeName)
 		// If a timeout is configured via the Prometheus header, add it to the context.
 		if v := r.Header.Get("X-Prometheus-Scrape-Timeout-Seconds"); v != "" {
 			timeoutSeconds, err := strconv.ParseFloat(v, 64)
