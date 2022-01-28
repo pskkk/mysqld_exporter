@@ -9,14 +9,14 @@ import (
 )
 
 // SendReport2Users : 发送内容到指定用户的钉钉工作通知(机器人url更改)，SendReport2Users("msg_string")
-func SendReport2Users(finallyRet string) {
+func SendReport2Users(robotURL string, finallyRet string) {
 	notNullStrReStr := "\\w"
 	notNullReg := regexp.MustCompile(notNullStrReStr)
 	if !notNullReg.Match([]byte(finallyRet)) {
 		return
 	}
 
-	resp, err := http.Post("钉钉群机器人地址",
+	resp, err := http.Post(robotURL,
 		"application/json",
 		strings.NewReader(finallyRet))
 	if err != nil {

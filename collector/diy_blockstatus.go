@@ -228,7 +228,7 @@ func (DiyScrapeBlockedTrx) Scrape(ctx context.Context, db *sql.DB, ch chan<- pro
 				blockedTrxInfo.killBlockingQuery,
 				blockedTrxInfo.killBlockingThread)
 			fmt.Println("--->>> Send to DingDing")
-			tools.SendReport2Users(blockInfoMsg)
+			tools.SendReport2Users(ctx.Value("diyddrobot").(string), blockInfoMsg)
 			//fmt.Println(blockedTrxInfo)
 		}
 	}

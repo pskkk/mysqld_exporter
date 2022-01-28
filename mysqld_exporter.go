@@ -64,9 +64,10 @@ var (
 		"tls.insecure-skip-verify",
 		"Ignore certificate and server verification when using a tls connection.",
 	).Bool()
-	dsn            string
-	diyNodeName    string // 个人新增，保存配置文件中的 nodename 配置项
-	diymoniterAddr string // 节点性能趋势 地址
+	dsn                 string
+	diyNodeName         string // 个人新增，保存配置文件中的 nodename 配置项
+	diyMoniterAddr      string // 节点性能趋势 地址
+	diyDingDingRobotURL string // 钉钉机器人地址
 )
 
 // scrapers lists all possible collection methods and if they should be enabled by default.
@@ -124,8 +125,9 @@ func parseMycnf(config interface{}) (string, error) {
 	if user == "" {
 		return dsn, fmt.Errorf("no user specified under [client] in %s", config)
 	}
-	diyNodeName = cfg.Section("client").Key("diynodename").MustString("notSet")       // 获取配置文件中的 diynodename
-	diymoniterAddr = cfg.Section("client").Key("diymoniteraddr").MustString("notSet") // 获取配置文件中的 diymoniteraddr
+	diyNodeName = cfg.Section("client").Key("diynodename").MustString("notSet")                 // 获取配置文件中的 diynodename
+	diyMoniterAddr = cfg.Section("client").Key("diymoniteraddr").MustString("notSet")           // 获取配置文件中的 diymoniteraddr
+	diyDingDingRobotURL = cfg.Section("client").Key("diydingdingroboturl").MustString("notSet") // 获取配置文件中的 diydingdingrobot
 	host := cfg.Section("client").Key("host").MustString("localhost")
 	port := cfg.Section("client").Key("port").MustUint(3306)
 	socket := cfg.Section("client").Key("socket").String()
@@ -195,7 +197,8 @@ func newHandler(metrics collector.Metrics, scrapers []collector.Scraper, logger 
 		ctx := r.Context()
 		// 新增 context.WithValue(), 传递配置文件中的节点名称
 		ctx = context.WithValue(ctx, "diynodename", diyNodeName)
-		ctx = context.WithValue(ctx, "diymoniteraddr", diymoniterAddr)
+		ctx = context.WithValue(ctx, "diymoniteraddr", diyMoniterAddr)
+		ctx = context.WithValue(ctx, "diyddrobot", diyDingDingRobotURL)
 		// If a timeout is configured via the Prometheus header, add it to the context.
 		if v := r.Header.Get("X-Prometheus-Scrape-Timeout-Seconds"); v != "" {
 			timeoutSeconds, err := strconv.ParseFloat(v, 64)

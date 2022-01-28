@@ -81,7 +81,7 @@ func (DiyScrapeLongTrx) Version() float64 {
 
 func (DiyScrapeLongTrx) Scrape(ctx context.Context, db *sql.DB, ch chan<- prometheus.Metric, logger log.Logger) error {
 	var ltrxCounter int
-	//fmt.Println("Long Trx --------------->>>>", ctx.Value("diynodename"), ctx.Value("diymoniteraddr"))
+	fmt.Println("Long Trx --------------->>>>", ctx.Value("diynodename"), ctx.Value("diymoniteraddr"), ctx.Value("diyddrobot").(string))
 
 	if err := db.QueryRowContext(ctx, longTrxCountQuery).Scan(&ltrxCounter); err != nil {
 		logger.Log(err.Error()) // 输出到阿里云?,若输出到阿里云则需要区分日志内容
