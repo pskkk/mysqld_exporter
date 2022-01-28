@@ -9,3 +9,4 @@
 .idea
 *.iml
 /vendor
+tools/report2Users.go
