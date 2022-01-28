@@ -119,7 +119,6 @@ func (DiyScrapeBlockedTrx) Version() float64 {
 
 func (DiyScrapeBlockedTrx) Scrape(ctx context.Context, db *sql.DB, ch chan<- prometheus.Metric, logger log.Logger) error {
 	var blockedTrxMaxSecs int
-	fmt.Println("BLocked --------------->>>>", ctx)
 	if err := db.QueryRowContext(ctx, blockedTrxCountQuery).Scan(&blockedTrxMaxSecs); err != nil {
 		logger.Log(err.Error())
 		return err
@@ -187,41 +186,24 @@ func (DiyScrapeBlockedTrx) Scrape(ctx context.Context, db *sql.DB, ch chan<- pro
 				&blockedTrxInfo.waitingSQL,
 				&blockedTrxInfo.killBlockingQuery,
 				&blockedTrxInfo.killBlockingThread)
-			blockInfoMsg := fmt.Sprintf(`
-                出现_阻塞
------------------------------------------
-                  报告 
-阻塞时长(秒)	: 				%d
-加锁表		: 				%s
-加锁索引		: 				%s
-锁类型		: 				%s
------------------------------------------
-			   阻塞事务信息
-事务ID		:				%s	
-PID			:				%s
-锁ID		:				%s
-锁类型		:				%s
-事务开始时间	:				%s
-事务运行时长	:            	%s
-事务持锁行数	:               %d
-事务修改行数	:               %d
-当前SQL语句	:               %s
------------------------------------------
-			   等待事务信息
-事务ID		:            	%s
-PID			:               %s
-锁ID		:               %s
-锁类型		:               %s
-事务开始时间	:               %s
-事务运行时长	:               %s
-事务持锁行数	:               %d
-事务修改行数	:               %d
-当前SQL语句	:               %s
------------------------------------------
-			   处理语句
-kill_Query	: 				%s
-kill_Thread	:				%s
-`, blockedTrxInfo.summaryWaitSecs,
+			blockInfoMsg := fmt.Sprintf(`{
+		"msgtype": "markdown",
+			"markdown": {
+			"title": "prometheus 告警",
+				"text": "
+# test出现_阻塞  \n  
+- [%v](%v)  \n  
+## 报告  \n  
+> 阻塞时长(秒):  %d  \n  加锁表:  %s  \n  加锁索引:  %s  \n  锁类型:  %s  \n  
+## 阻塞事务信息  \n  
+> 事务ID:  %s  \n  PID:	%s  \n  锁ID:  %s  \n  锁类型  %s  \n  事务开始时间:  %s  \n  事务运行时长:  %s  \n  事务持锁行数:  %d  \n  事务修改行数:  %d  \n  当前SQL语句:  %s  \n  
+## 等待事务信息
+> 事务ID:  %s  \n  PID:	%s  \n  锁ID:  %s  \n  锁类型  %s  \n  事务开始时间:  %s  \n  事务运行时长:  %s  \n  事务持锁行数:  %d  \n  事务修改行数:  %d  \n  当前SQL语句:  %s  \n  
+## 处理语句
+> Kill_Query:  %s  \n  Kill_Thread:  %s  \n  
+"  
+		}
+	}`, ctx.Value("diynodename"), ctx.Value("diymoniteraddr"), blockedTrxInfo.summaryWaitSecs,
 				blockedTrxInfo.summaryLockedTable,
 				blockedTrxInfo.summaryLockedIndex,
 				blockedTrxInfo.summaryLockType,
@@ -245,8 +227,9 @@ kill_Thread	:				%s
 				blockedTrxInfo.waitingSQL,
 				blockedTrxInfo.killBlockingQuery,
 				blockedTrxInfo.killBlockingThread)
+			fmt.Println("--->>> Send to DingDing")
 			tools.SendReport2Users(blockInfoMsg)
-			fmt.Println(blockedTrxInfo)
+			//fmt.Println(blockedTrxInfo)
 		}
 	}
 	ch <- prometheus.MustNewConstMetric(blockedTrxDesc, prometheus.GaugeValue, float64(blockedTrxMaxSecs))

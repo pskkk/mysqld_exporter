@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/mysqld_exporter/tools"
 )
 
 const (
@@ -82,7 +81,7 @@ func (DiyScrapeLongTrx) Version() float64 {
 
 func (DiyScrapeLongTrx) Scrape(ctx context.Context, db *sql.DB, ch chan<- prometheus.Metric, logger log.Logger) error {
 	var ltrxCounter int
-	fmt.Println("Long Trx --------------->>>>", ctx.Value("hostname"))
+	//fmt.Println("Long Trx --------------->>>>", ctx.Value("diynodename"), ctx.Value("diymoniteraddr"))
 
 	if err := db.QueryRowContext(ctx, longTrxCountQuery).Scan(&ltrxCounter); err != nil {
 		logger.Log(err.Error()) // 输出到阿里云?,若输出到阿里云则需要区分日志内容
@@ -178,11 +177,10 @@ Kill_Query          :       %s
 				longTrxInfo.sqlText,
 				longTrxInfo.killThread,
 				longTrxInfo.killQuery)
-			tools.SendReport2Users(longTrxInfoMsg)
-			fmt.Println(longTrxInfo) // 输出阿里云日志
-
+			//tools.SendReport2Users(longTrxInfoMsg)
+			fmt.Println(longTrxInfoMsg)
 		}
-		fmt.Println("--------------------------------")
+		//fmt.Println("--------------------------------")
 	}
 
 	ch <- prometheus.MustNewConstMetric(longTrxDesc, prometheus.GaugeValue, float64(ltrxCounter))

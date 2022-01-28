@@ -2,6 +2,7 @@ package tools
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strings"
@@ -15,14 +16,19 @@ func SendReport2Users(finallyRet string) {
 		return
 	}
 
-	msgtext := fmt.Sprintf(`{"msgtype": "text","text": {"%s"}}`, finallyRet)
-
 	resp, err := http.Post("https://oapi.dingtalk.com/robot/send?access_token=002789a338e2b45d686be2249d4df5e600fc78b87c33677add214afd9e205168",
 		"application/json",
-		strings.NewReader(msgtext))
+		strings.NewReader(finallyRet))
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		// handle error
+	}
+
+	fmt.Println("DingDing respones : ---->>> ", string(body))
 }
